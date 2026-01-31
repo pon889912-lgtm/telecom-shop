@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 제조사 (삼성, 애플 등)
+model Manufacturer {
+  id        String    @id @default(cuid())
+  name      String    @unique // "Samsung", "Apple"
+  nameKo    String    // "삼성전자", "애플"
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// 통신사 (SKT, KT, LG U+)
+model Carrier {
+  id        String   @id @default(cuid())
+  name      String   @unique // "SKT", "KT", "LG U+"
+  code      String   @unique // "skt", "kt", "lgu"
+  color     String   // 브랜드 컬러 코드 (예: "#ea002c")
+  plans     Plan[]
+  subsidies Subsidy[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 상품 (기기)
+model Product {
+  id              String        @id @default(cuid())
+  name            String        // "갤럭시 S25 Ultra"
+  model           String        // "SM-S938N"
+  capacity        String        // "256GB", "512GB", "1TB"
+  color           String        // "티타늄 그레이", "블랙"
+  retailPrice     Int           // 출고가 (원) - 예: 1350000
+  imageUrl        String?       // 제품 이미지 URL
+  thumbnailUrl    String?       // 썸네일 이미지 URL
+  releaseDate     DateTime      // 출시일
+  description     String?       // 상품 설명
+  specs           String?       // 스펙 정보 (JSON 문자열)
+  
+  manufacturer    Manufacturer  @relation(fields: [manufacturerId], references: [id])
+  manufacturerId  String
+  
+  subsidies       Subsidy[]
+  orders          Order[]
+  
+  isActive        Boolean       @default(true) // 판매 활성화 여부
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([manufacturerId])
+}
+
+// 요금제
+model Plan {
+  id          String   @id @default(cuid())
+  name        String   // "5G 프리미어 플러스"
+  dataAmount  String   // "무제한", "100GB", "200GB"
+  voiceAmount String   @default("무제한") // 음성 통화
+  smsAmount   String   @default("무제한") // 문자 메시지
+  monthlyFee  Int      // 월정액 (원) - 예: 65000
+  description String?
+  features    String?  // 부가 기능 (JSON 문자열)
+  
+  carrier     Carrier  @relation(fields: [carrierId], references: [id])
+  carrierId   String
+  
+  orders      Order[]
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([carrierId])
+}
+
+// 공시지원금 (통신사별, 제품별)
+model Subsidy {
+  id                String   @id @default(cuid())
+  
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId         String
+  
+  carrier           Carrier  @relation(fields: [carrierId], references: [id])
+  carrierId         String
+  
+  publicSubsidy     Int      // 공시지원금 (원) - 예: 400000
+  additionalSubsidy Int      @default(0) // 추가지원금 (원) - 예: 100000
+  
+  validFrom         DateTime // 유효 시작일
+  validUntil        DateTime // 유효 종료일
+  
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([productId, carrierId, validFrom])
+  @@index([productId])
+  @@index([carrierId])
+}
+
+// 주문
+model Order {
+  id                String   @id @default(cuid())
+  orderNumber       String   @unique // 주문번호 (예: "ORD-20260131-0001")
+  
+  product           Product  @relation(fields: [productId], references: [id])
+  productId         String
+  
+  plan              Plan     @relation(fields: [planId], references: [id])
+  planId            String
+  
+  // 선택한 옵션
+  discountType      String   // "PUBLIC_SUBSIDY" | "OPTIONAL_DISCOUNT"
+  installmentMonths Int      @default(24) // 할부 개월 수
+  
+  // 추가 할인
+  cardDiscount      Int      @default(0) // 제휴카드 할인 (월)
+  familyDiscount    Int      @default(0) // 가족결합 할인 (월)
+  
+  // 계산된 금액
+  installmentPrincipal Int   // 할부원금
+  monthlyInstallment   Int   // 월 할부금 (이자 포함)
+  monthlyPlanFee       Int   // 월 요금
+  monthlyPayment       Int   // 최종 월 납부액
+  totalPayment         Int   // 총 납부액 (2년)
+  
+  // 고객 정보
+  customerName      String
+  customerPhone     String
+  customerBirth     String   // YYMMDD
+  customerEmail     String?
+  
+  // 배송 정보
+  shippingAddress   String?
+  shippingZipCode   String?
+  shippingMessage   String?
+  
+  // 주문 상태
+  status            String   @default("PENDING") // "PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"
+  
+  // 약관 동의
+  termsAgreed       Boolean  @default(false)
+  privacyAgreed     Boolean  @default(false)
+  marketingAgreed   Boolean  @default(false)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([orderNumber])
+  @@index([productId])
+  @@index([status])
+  @@index([createdAt])
+}
