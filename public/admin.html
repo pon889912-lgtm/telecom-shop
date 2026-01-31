@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 페이지 - 통신사 쇼핑몰</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-primary-600">🔧 관리자 페이지</h1>
+        <a href="/" class="text-gray-700 hover:text-primary-600">← 메인으로</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Tabs -->
+    <div class="bg-white rounded-lg shadow-md mb-6">
+      <div class="border-b">
+        <nav class="flex">
+          <button 
+            onclick="switchTab('products')" 
+            class="tab-btn px-6 py-4 font-semibold border-b-2 border-primary-600 text-primary-600"
+            data-tab="products"
+          >
+            📱 상품 관리
+          </button>
+          <button 
+            onclick="switchTab('subsidies')" 
+            class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-900"
+            data-tab="subsidies"
+          >
+            💰 공시지원금 관리
+          </button>
+          <button 
+            onclick="switchTab('plans')" 
+            class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-900"
+            data-tab="plans"
+          >
+            📶 요금제 관리
+          </button>
+          <button 
+            onclick="switchTab('orders')" 
+            class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-900"
+            data-tab="orders"
+          >
+            📋 주문 관리
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Tab Contents -->
+    
+    <!-- 상품 관리 -->
+    <div id="products-tab" class="tab-content active">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold">상품 목록</h2>
+          <button 
+            onclick="showProductForm()" 
+            class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
+          >
+            + 새 상품 추가
+          </button>
+        </div>
+
+        <!-- Product Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">제조사</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">상품명</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">용량</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">출고가</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">상태</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">관리</th>
+              </tr>
+            </thead>
+            <tbody id="products-table-body" class="divide-y">
+              <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                  데이터를 불러오는 중...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Product Form Modal -->
+        <div id="product-form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg p-8 max-w-2xl w-full max-h-screen overflow-y-auto">
+            <h3 class="text-2xl font-bold mb-6">상품 등록</h3>
+            <form id="product-form" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2">제조사</label>
+                  <select name="manufacturerId" required class="w-full px-4 py-2 border rounded-lg">
+                    <option value="">선택하세요</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">상품명</label>
+                  <input type="text" name="name" required class="w-full px-4 py-2 border rounded-lg" placeholder="갤럭시 S25 Ultra">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">모델명</label>
+                  <input type="text" name="model" required class="w-full px-4 py-2 border rounded-lg" placeholder="SM-S938N">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">용량</label>
+                  <input type="text" name="capacity" required class="w-full px-4 py-2 border rounded-lg" placeholder="256GB">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">색상</label>
+                  <input type="text" name="color" required class="w-full px-4 py-2 border rounded-lg" placeholder="티타늄 그레이">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">출고가 (원)</label>
+                  <input type="number" name="retailPrice" required class="w-full px-4 py-2 border rounded-lg" placeholder="1350000">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-2">설명</label>
+                <textarea name="description" rows="3" class="w-full px-4 py-2 border rounded-lg" placeholder="상품 설명"></textarea>
+              </div>
+              <div class="flex gap-3 pt-4">
+                <button type="submit" class="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700">
+                  저장
+                </button>
+                <button type="button" onclick="hideProductForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                  취소
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 공시지원금 관리 -->
+    <div id="subsidies-tab" class="tab-content">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold">공시지원금 목록</h2>
+          <button 
+            onclick="showSubsidyForm()" 
+            class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
+          >
+            + 새 지원금 추가
+          </button>
+        </div>
+
+        <!-- Subsidy Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">상품</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">통신사</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">공시지원금</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">추가지원금</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">유효기간</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">관리</th>
+              </tr>
+            </thead>
+            <tbody id="subsidies-table-body" class="divide-y">
+              <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                  데이터를 불러오는 중...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Subsidy Form Modal -->
+        <div id="subsidy-form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg p-8 max-w-2xl w-full">
+            <h3 class="text-2xl font-bold mb-6">공시지원금 등록</h3>
+            <form id="subsidy-form" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2">상품</label>
+                  <select name="productId" required class="w-full px-4 py-2 border rounded-lg">
+                    <option value="">선택하세요</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">통신사</label>
+                  <select name="carrierId" required class="w-full px-4 py-2 border rounded-lg">
+                    <option value="">선택하세요</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">공시지원금 (원)</label>
+                  <input type="number" name="publicSubsidy" required class="w-full px-4 py-2 border rounded-lg" placeholder="400000">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">추가지원금 (원)</label>
+                  <input type="number" name="additionalSubsidy" class="w-full px-4 py-2 border rounded-lg" placeholder="100000" value="0">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">유효 시작일</label>
+                  <input type="date" name="validFrom" required class="w-full px-4 py-2 border rounded-lg">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">유효 종료일</label>
+                  <input type="date" name="validUntil" required class="w-full px-4 py-2 border rounded-lg">
+                </div>
+              </div>
+              <div class="flex gap-3 pt-4">
+                <button type="submit" class="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700">
+                  저장
+                </button>
+                <button type="button" onclick="hideSubsidyForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                  취소
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 요금제 관리 -->
+    <div id="plans-tab" class="tab-content">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold">요금제 목록</h2>
+          <button 
+            onclick="showPlanForm()" 
+            class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
+          >
+            + 새 요금제 추가
+          </button>
+        </div>
+
+        <!-- Plan Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">통신사</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">요금제명</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">데이터</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">월정액</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">상태</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">관리</th>
+              </tr>
+            </thead>
+            <tbody id="plans-table-body" class="divide-y">
+              <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                  데이터를 불러오는 중...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Plan Form Modal -->
+        <div id="plan-form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg p-8 max-w-2xl w-full">
+            <h3 class="text-2xl font-bold mb-6">요금제 등록</h3>
+            <form id="plan-form" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2">통신사</label>
+                  <select name="carrierId" required class="w-full px-4 py-2 border rounded-lg">
+                    <option value="">선택하세요</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">요금제명</label>
+                  <input type="text" name="name" required class="w-full px-4 py-2 border rounded-lg" placeholder="5G 프리미어 플러스">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">데이터</label>
+                  <input type="text" name="dataAmount" required class="w-full px-4 py-2 border rounded-lg" placeholder="무제한">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">월정액 (원)</label>
+                  <input type="number" name="monthlyFee" required class="w-full px-4 py-2 border rounded-lg" placeholder="65000">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-2">설명</label>
+                <textarea name="description" rows="3" class="w-full px-4 py-2 border rounded-lg" placeholder="요금제 설명"></textarea>
+              </div>
+              <div class="flex gap-3 pt-4">
+                <button type="submit" class="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700">
+                  저장
+                </button>
+                <button type="button" onclick="hidePlanForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                  취소
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 주문 관리 -->
+    <div id="orders-tab" class="tab-content">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold mb-6">주문 목록</h2>
+
+        <!-- Order Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">주문번호</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">고객명</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">상품</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">요금제</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">월 납부액</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">상태</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">주문일</th>
+              </tr>
+            </thead>
+            <tbody id="orders-table-body" class="divide-y">
+              <tr>
+                <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                  주문 내역이 없습니다
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab Switching
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Remove active state from all buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-b-2', 'border-primary-600', 'text-primary-600');
+        btn.classList.add('text-gray-600');
+      });
+      
+      // Show selected tab
+      document.getElementById(tabName + '-tab').classList.add('active');
+      
+      // Activate button
+      const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+      activeBtn.classList.add('border-b-2', 'border-primary-600', 'text-primary-600');
+      activeBtn.classList.remove('text-gray-600');
+    }
+
+    // Product Form
+    function showProductForm() {
+      document.getElementById('product-form-modal').classList.remove('hidden');
+    }
+
+    function hideProductForm() {
+      document.getElementById('product-form-modal').classList.add('hidden');
+      document.getElementById('product-form').reset();
+    }
+
+    // Subsidy Form
+    function showSubsidyForm() {
+      document.getElementById('subsidy-form-modal').classList.remove('hidden');
+    }
+
+    function hideSubsidyForm() {
+      document.getElementById('subsidy-form-modal').classList.add('hidden');
+      document.getElementById('subsidy-form').reset();
+    }
+
+    // Plan Form
+    function showPlanForm() {
+      document.getElementById('plan-form-modal').classList.remove('hidden');
+    }
+
+    function hidePlanForm() {
+      document.getElementById('plan-form-modal').classList.add('hidden');
+      document.getElementById('plan-form').reset();
+    }
+
+    // Format Currency
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('ko-KR').format(amount) + '원';
+    }
+
+    // Load initial data (mock data for demonstration)
+    document.addEventListener('DOMContentLoaded', function() {
+      loadProducts();
+      loadSubsidies();
+      loadPlans();
+    });
+
+    function loadProducts() {
+      const tbody = document.getElementById('products-table-body');
+      tbody.innerHTML = `
+        <tr>
+          <td class="px-4 py-3">삼성전자</td>
+          <td class="px-4 py-3 font-semibold">갤럭시 S25 Ultra</td>
+          <td class="px-4 py-3">256GB</td>
+          <td class="px-4 py-3 font-semibold">1,350,000원</td>
+          <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">활성</span></td>
+          <td class="px-4 py-3">
+            <button class="text-blue-600 hover:text-blue-800 mr-2">수정</button>
+            <button class="text-red-600 hover:text-red-800">삭제</button>
+          </td>
+        </tr>
+        <tr>
+          <td class="px-4 py-3">애플</td>
+          <td class="px-4 py-3 font-semibold">아이폰 17 Pro</td>
+          <td class="px-4 py-3">256GB</td>
+          <td class="px-4 py-3 font-semibold">1,550,000원</td>
+          <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">활성</span></td>
+          <td class="px-4 py-3">
+            <button class="text-blue-600 hover:text-blue-800 mr-2">수정</button>
+            <button class="text-red-600 hover:text-red-800">삭제</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    function loadSubsidies() {
+      const tbody = document.getElementById('subsidies-table-body');
+      tbody.innerHTML = `
+        <tr>
+          <td class="px-4 py-3">갤럭시 S25 Ultra</td>
+          <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">SKT</span></td>
+          <td class="px-4 py-3 font-semibold">400,000원</td>
+          <td class="px-4 py-3 font-semibold">100,000원</td>
+          <td class="px-4 py-3 text-sm text-gray-600">2026-01-01 ~ 2026-03-31</td>
+          <td class="px-4 py-3">
+            <button class="text-blue-600 hover:text-blue-800 mr-2">수정</button>
+            <button class="text-red-600 hover:text-red-800">삭제</button>
+          </td>
+        </tr>
+        <tr>
+          <td class="px-4 py-3">갤럭시 S25 Ultra</td>
+          <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">KT</span></td>
+          <td class="px-4 py-3 font-semibold">420,000원</td>
+          <td class="px-4 py-3 font-semibold">80,000원</td>
+          <td class="px-4 py-3 text-sm text-gray-600">2026-01-01 ~ 2026-03-31</td>
+          <td class="px-4 py-3">
+            <button class="text-blue-600 hover:text-blue-800 mr-2">수정</button>
+            <button class="text-red-600 hover:text-red-800">삭제</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    function loadPlans() {
+      const tbody = document.getElementById('plans-table-body');
+      tbody.innerHTML = `
+        <tr>
+          <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">SKT</span></td>
+          <td class="px-4 py-3 font-semibold">5G 프리미어 플러스</td>
+          <td class="px-4 py-3">무제한</td>
+          <td class="px-4 py-3 font-semibold">65,000원</td>
+          <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">활성</span></td>
+          <td class="px-4 py-3">
+            <button class="text-blue-600 hover:text-blue-800 mr-2">수정</button>
+            <button class="text-red-600 hover:text-red-800">삭제</button>
+          </td>
+        </tr>
+        <tr>
+          <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">KT</span></td>
+          <td class="px-4 py-3 font-semibold">5G 슈퍼플랜 프리미엄</td>
+          <td class="px-4 py-3">무제한</td>
+          <td class="px-4 py-3 font-semibold">65,000원</td>
+          <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">활성</span></td>
+          <td class="px-4 py-3">
+            <button class="text-blue-600 hover:text-blue-800 mr-2">수정</button>
+            <button class="text-red-600 hover:text-red-800">삭제</button>
+          </td>
+        </tr>
+      `;
+    }
+  </script>
+</body>
+</html>
