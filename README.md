@@ -88,23 +88,45 @@ telecom-shop/
 
 ## 🚀 시작하기
 
+### 필수 요구사항
+
+- Node.js 18.x 이상
+- npm 또는 yarn
+
 ### 1. 의존성 설치
 
 ```bash
 npm install
 ```
 
-### 2. 데이터베이스 설정
+### 2. 환경 변수 설정
+
+`.env` 파일을 생성하세요:
 
 ```bash
-# Prisma 마이그레이션 실행
+# .env 파일 생성
+cp .env.example .env
+```
+
+`.env` 파일 내용:
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+### 3. 데이터베이스 설정
+
+```bash
+# Prisma 클라이언트 생성
+npm run prisma:generate
+
+# 마이그레이션 실행
 npm run prisma:migrate
 
 # 시드 데이터 추가
 npx tsx prisma/seed.ts
 ```
 
-### 3. 개발 서버 실행
+### 4. 개발 서버 실행
 
 ```bash
 npm run dev
@@ -115,6 +137,19 @@ npm run dev
 ### 4. 관리자 페이지 접근
 
 브라우저에서 [http://localhost:3000/admin.html](http://localhost:3000/admin.html) 접속
+
+## 🚀 배포 (Deployment)
+
+프로덕션 환경에 배포하는 방법은 **[DEPLOYMENT.md](./DEPLOYMENT.md)** 문서를 참고하세요.
+
+### 빠른 배포 (Vercel 권장)
+
+1. Vercel 계정 생성: https://vercel.com
+2. GitHub 저장소 연결
+3. 환경 변수 설정: `DATABASE_URL`
+4. 배포 클릭!
+
+자세한 내용은 [배포 가이드](./DEPLOYMENT.md)를 확인하세요.
 
 ## 📊 데이터베이스 스키마
 
